@@ -60,9 +60,7 @@
     callbackId = command.callbackId;
     
     [synthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
-    
-    NSDictionary* options = [command.arguments objectAtIndex:0];
-    
+
     if (!locale || (id)locale == [NSNull null]) {
         locale = @"en-US";
     }
@@ -70,20 +68,22 @@
     if (!rate) {
         rate = 1.0;
     }
+
+    // Definir `pitch` corretamente
+    double pitch = [[options objectForKey:@"pitch"] doubleValue];
     
     if (!pitch) {
         pitch = 1.2;
     }
     
-    AVSpeechUtterance* utterance = [[AVSpeechUtterance new] initWithString:text];
+    AVSpeechUtterance* utterance = [[AVSpeechUtterance alloc] initWithString:text];
     utterance.voice = [AVSpeechSynthesisVoice voiceWithLanguage:locale];
-    // Rate expression adjusted manually for a closer match to other platform.
     utterance.rate = (AVSpeechUtteranceMinimumSpeechRate * 1.5 + AVSpeechUtteranceDefaultSpeechRate) / 2.25 * rate * rate;
-    // workaround for https://github.com/vilic/cordova-plugin-tts/issues/21
+
     if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9.0) {
        utterance.rate = utterance.rate * 2;
-       // see http://stackoverflow.com/questions/26097725/avspeechuterrance-speed-in-ios-8
     }
+
     utterance.pitchMultiplier = pitch;
     [synthesizer speakUtterance:utterance];
 }
